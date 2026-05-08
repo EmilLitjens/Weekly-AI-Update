@@ -1,0 +1,34 @@
+name: Weekly Battery Briefing
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC = 07:00 CET (winter) / 08:00 CEST (summer).
+    # GitHub uses UTC. Adjust the hour if you'd prefer a different local time.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:  # allows you to trigger a run manually from the Actions tab
+
+jobs:
+  send-briefing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate and send briefing
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+        run: python briefing.py
